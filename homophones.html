@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes, maximum-scale=3">
+    <meta name="theme-color" content="#088395">
+    <meta name="description" content="Master homophones, idioms, and tricky words with interactive learning modes. Works offline!">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Learning Waterfall">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23088395' width='192' height='192'/><text x='50%' y='50%' font-size='120' font-weight='bold' text-anchor='middle' dominant-baseline='central' fill='white'>💧</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23088395' width='180' height='180'/><text x='90' y='90' font-size='100' font-weight='bold' text-anchor='middle' dominant-baseline='central' fill='white'>💧</text></svg>">
+    <title>English Learning Waterfall - Interactive Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes waterfall {
+            0% {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bubble {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        @keyframes flow {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 100% 100%;
+            }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a4d68 0%, #088395 50%, #05bfdb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Waterfall animation background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+        }
+
+        @media (min-width: 601px) {
+            .container {
+                margin: 20px auto;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(5, 191, 219, 0.2);
+                min-height: auto;
+            }
+        }
+
+
+        .header {
+            background: linear-gradient(135deg, #0a4d68 0%, #088395 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #0a4d68 0%, #088395 100%);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 601px) {
+            .header {
+                padding: 40px 30px;
+            }
+        }
+
+        .header::after {
+            content: '💧 💧 💧';
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 1.5em;
+            opacity: 0.3;
+            animation: bubble 3s ease-in-out infinite;
+        }
+
+        @media (min-width: 601px) {
+            .header::after {
+                right: 20px;
+                top: 20px;
+                font-size: 2em;
+            }
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            animation: shimmer 3s infinite;
+            background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,1), rgba(255,255,255,0.8));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            border-color: #088395;
+            color: #088395;
+        }
+
+        .mode-btn.active {
+            background: #088395;
+            color: white;
+            border-color: #088395;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .word-pair {
+            background: #f5f5f5;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #088395;
+        }
+
+        .word-pair h3 {
+            color: #088395;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .word-definitions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .word-definitions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .definition {
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .definition strong {
+            color: #088395;
+            font-size: 1.1em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .definition p {
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .example {
+            font-style: italic;
+            color: #555;
+            border-left: 2px solid #088395;
+            padding-left: 10px;
+            margin-top: 8px;
+        }
+
+        .quiz-question {
+            background: #f5f5f5;
+            padding: 25px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-question h3 {
+            color: #088395;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .option:hover:not(.disabled) {
+            border-color: #088395;
+            background: #f0f0ff;
+        }
+
+        .option.selected {
+            border-color: #088395;
+            background: #088395;
+            color: white;
+        }
+
+        .option.correct {
+            border-color: #4caf50;
+            background: #4caf50;
+            color: white;
+        }
+
+        .option.incorrect {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: #ffcdd2;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 1.3em;
+            color: #088395;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #088395;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0a6b84;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            color: #088395;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #088395;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .no-results {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #088395 0%, #05bfdb 100%);
+            transition: width 0.3s;
+        }
+
+        .category-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover {
+            border-color: #05bfdb;
+            color: #05bfdb;
+        }
+
+        .category-btn.active {
+            background: #05bfdb;
+            color: white;
+            border-color: #05bfdb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌊 English Learning Waterfall</h1>
+            <p>Master homophones, idioms, tricky words & more</p>
+        </div>
+
+        <div class="content">
+            <div class="category-selector">
+                <button class="category-btn active" onclick="switchCategory('homophones')">Homophones</button>
+                <button class="category-btn" onclick="switchCategory('idioms')">Idioms</button>
+                <button class="category-btn" onclick="switchCategory('tricky')">Tricky Words</button>
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="switchMode('reference')">Reference</button>
+                <button class="mode-btn" onclick="switchMode('quiz')">Quiz</button>
+                <button class="mode-btn" onclick="switchMode('flashcards')">Flashcards</button>
+            </div>
+
+            <!-- Reference Section -->
+            <div id="reference" class="section active">
+                <input type="text" class="search-box" id="searchInput" placeholder="Search words..." onkeyup="filterWords()">
+                <div id="wordsContainer"></div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quiz" class="section">
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="quizScore">0</div>
+                        <div class="stat-label">Score</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="quizTotal">0</div>
+                        <div class="stat-label">Answered</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="quizPercentage">0%</div>
+                        <div class="stat-label">Percentage</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="quizContainer"></div>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
+                    <button class="btn-secondary" onclick="resetQuiz()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Flashcards Section -->
+            <div id="flashcards" class="section">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div class="stat-number" id="cardCounter">1 / 1</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="cardProgressFill"></div>
+                    </div>
+                </div>
+                <div id="flashcardContainer" style="perspective: 1000px;">
+                    <div class="flashcard" onclick="flipCard()" style="
+                        width: 100%;
+                        height: 300px;
+                        background: linear-gradient(135deg, #088395 0%, #05bfdb 100%);
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 1.5em;
+                        cursor: pointer;
+                        text-align: center;
+                        padding: 20px;
+                        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+                        transition: transform 0.3s;
+                    " id="flashcard">
+                        Click to start
+                    </div>
+                </div>
+                <div class="button-group" style="margin-top: 30px;">
+                    <button class="btn-secondary" onclick="previousCard()">← Previous</button>
+                    <button class="btn-primary" onclick="shuffleFlashcards()">Shuffle</button>
+                    <button class="btn-secondary" onclick="nextCard()">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCategory = 'homophones';
+        let currentData = [];
+
+        const homophonesData = [
+            {
+                words: ['there', 'their', "they're"],
+                definitions: [
+                    { word: 'there', def: 'In or at that place', example: "I\'m going there tomorrow." },
+                    { word: 'their', def: 'Possessive form of they', example: 'Their house is beautiful.' },
+                    { word: "they're", def: 'They are (contraction)', example: "They\'re coming to the party." }
+                ]
+            },
+            {
+                words: ['your', "you're", 'yore'],
+                definitions: [
+                    { word: 'your', def: 'Possessive form of you', example: 'Is this your book?' },
+                    { word: "you're", def: 'You are (contraction)', example: "You\'re doing great!" },
+                    { word: 'yore', def: 'Long ago, days of old', example: 'Days of yore.' }
+                ]
+            },
+            {
+                words: ["it's", 'its'],
+                definitions: [
+                    { word: "it's", def: 'It is (contraction)', example: "It\'s a beautiful day." },
+                    { word: 'its', def: 'Possessive form of it', example: 'The cat licked its paws.' }
+                ]
+            },
+            {
+                words: ['by', 'buy', 'bye'],
+                definitions: [
+                    { word: 'by', def: 'Near; indicating agency or means', example: 'By the window.' },
+                    { word: 'buy', def: 'To purchase', example: 'I will buy a new car.' },
+                    { word: 'bye', def: 'Goodbye', example: 'Bye for now!' }
+                ]
+            },
+            {
+                words: ['hear', 'here'],
+                definitions: [
+                    { word: 'hear', def: 'To perceive sound', example: 'Did you hear that noise?' },
+                    { word: 'here', def: 'In or at this place', example: 'Come here please.' }
+                ]
+            },
+            {
+                words: ['know', 'no'],
+                definitions: [
+                    { word: 'know', def: 'To have knowledge of', example: 'I know the answer.' },
+                    { word: 'no', def: 'Negative response', example: 'No, I disagree.' }
+                ]
+            },
+            {
+                words: ['affect', 'effect'],
+                definitions: [
+                    { word: 'affect', def: 'To influence; usually a verb', example: 'This will affect your grade.' },
+                    { word: 'effect', def: 'Result or consequence; usually a noun', example: 'The effect was amazing.' }
+                ]
+            },
+            {
+                words: ['site', 'cite', 'sight'],
+                definitions: [
+                    { word: 'site', def: 'A location or place', example: 'The construction site.' },
+                    { word: 'cite', def: 'To quote or reference', example: 'Please cite your sources.' },
+                    { word: 'sight', def: 'The ability to see', example: 'Love at first sight.' }
+                ]
+            },
+            {
+                words: ['to', 'too', 'two'],
+                definitions: [
+                    { word: 'to', def: 'Preposition indicating direction', example: 'Going to the store.' },
+                    { word: 'too', def: 'Also; more than enough', example: 'Can I come too?' },
+                    { word: 'two', def: 'Number 2', example: 'I have two cats.' }
+                ]
+            },
+            {
+                words: ['rain', 'reign', 'rein'],
+                definitions: [
+                    { word: 'rain', def: 'Precipitation from clouds', example: 'It will rain tomorrow.' },
+                    { word: 'reign', def: 'Period of rule by a monarch', example: 'During her reign.' },
+                    { word: 'rein', def: 'Strap used to control a horse', example: 'Pull the rein gently.' }
+                ]
+            },
+            {
+                words: ['real', 'reel'],
+                definitions: [
+                    { word: 'real', def: 'Genuine; actually existing', example: 'Is this real gold?' },
+                    { word: 'reel', def: 'Spool; to wind', example: 'Reel in the fishing line.' }
+                ]
+            },
+            {
+                words: ['steal', 'steel'],
+                definitions: [
+                    { word: 'steal', def: 'To take without permission', example: 'Do not steal.' },
+                    { word: 'steel', def: 'Metal alloy of iron', example: 'Stainless steel.' }
+                ]
+            },
+            {
+                words: ['waste', 'waist'],
+                definitions: [
+                    { word: 'waste', def: 'Unwanted material; to squander', example: 'Don\'t waste food.' },
+                    { word: 'waist', def: 'Part of the body', example: 'Tight at the waist.' }
+                ]
+            },
+            {
+                words: ['air', 'heir'],
+                definitions: [
+                    { word: 'air', def: 'Gases we breathe', example: 'Fresh air.' },
+                    { word: 'heir', def: 'Person who inherits', example: 'The heir to the throne.' }
+                ]
+            },
+            {
+                words: ['board', 'bored'],
+                definitions: [
+                    { word: 'board', def: 'Plank of wood; group of directors', example: 'Board of directors.' },
+                    { word: 'bored', def: 'Not interested; past tense of bore', example: 'I am bored.' }
+                ]
+            },
+            {
+                words: ['sick', 'sic'],
+                definitions: [
+                    { word: 'sick', def: 'Ill; unwell', example: 'I feel sick.' },
+                    { word: 'sic', def: 'Thus; so (used in quotes)', example: '[sic] indicates exact quote.' }
+                ]
+            },
+            {
+                words: ['one', 'won'],
+                definitions: [
+                    { word: 'one', def: 'Number 1', example: 'I have one apple.' },
+                    { word: 'won', def: 'Past tense of win', example: 'She won the race.' }
+                ]
+            },
+            {
+                words: ['read', 'red'],
+                definitions: [
+                    { word: 'read', def: 'To look at written words', example: 'I read a book.' },
+                    { word: 'red', def: 'Color', example: 'Red roses.' }
+                ]
+            },
+            {
+                words: ['serial', 'cereal'],
+                definitions: [
+                    { word: 'serial', def: 'Relating to a series; arranged in order', example: 'Serial number.' },
+                    { word: 'cereal', def: 'Breakfast grain product', example: 'Eat your cereal.' }
+                ]
+            },
+            {
+                words: ['skull', 'scull'],
+                definitions: [
+                    { word: 'skull', def: 'Bone structure of the head', example: 'The skull protects the brain.' },
+                    { word: 'scull', def: 'Small boat; to propel a boat', example: 'Row the scull.' }
+                ]
+            },
+            {
+                words: ['sea', 'see'],
+                definitions: [
+                    { word: 'sea', def: 'Large body of salt water', example: 'Swimming in the sea.' },
+                    { word: 'see', def: 'To perceive with eyes', example: 'Can you see me?' }
+                ]
+            },
+            {
+                words: ['tail', 'tale'],
+                definitions: [
+                    { word: 'tail', def: 'Rear appendage of an animal', example: 'The dog wagged its tail.' },
+                    { word: 'tale', def: 'A story', example: 'Fairy tale.' }
+                ]
+            },
+            {
+                words: ['whether', 'weather'],
+                definitions: [
+                    { word: 'whether', def: 'Expressing doubt or two possibilities', example: 'Whether you like it or not.' },
+                    { word: 'weather', def: 'Atmospheric conditions', example: 'Sunny weather.' }
+                ]
+            },
+            {
+                words: ['counsel', 'council', 'consul'],
+                definitions: [
+                    { word: 'counsel', def: 'Advice; lawyer', example: 'Seek legal counsel.' },
+                    { word: 'council', def: 'Group of advisors', example: 'City council.' },
+                    { word: 'consul', def: 'Government official', example: 'US Consul.' }
+                ]
+            },
+            {
+                words: ['accept', 'except'],
+                definitions: [
+                    { word: 'accept', def: 'To receive or agree to', example: 'Accept the offer.' },
+                    { word: 'except', def: 'Not including; excluding', example: 'Everyone except John.' }
+                ]
+            },
+            {
+                words: ['adopt', 'adapt', 'adept'],
+                definitions: [
+                    { word: 'adopt', def: 'To take as one\'s own', example: 'Adopt a child.' },
+                    { word: 'adapt', def: 'To adjust or modify', example: 'Adapt to new surroundings.' },
+                    { word: 'adept', def: 'Skilled and competent', example: 'Adept at coding.' }
+                ]
+            },
+            {
+                words: ['formally', 'formerly'],
+                definitions: [
+                    { word: 'formally', def: 'In a formal manner', example: 'Formally educated.' },
+                    { word: 'formerly', def: 'Previously; in the past', example: 'Formerly known as.' }
+                ]
+            },
+            {
+                words: ['born', 'borne'],
+                definitions: [
+                    { word: 'born', def: 'Brought into existence', example: 'I was born in 1990.' },
+                    { word: 'borne', def: 'Carried or endured', example: 'Borne by the wind.' }
+                ]
+            },
+            {
+                words: ['appellant', 'appellate'],
+                definitions: [
+                    { word: 'appellant', def: 'Party who appeals in court', example: 'The appellant argued the case.' },
+                    { word: 'appellate', def: 'Relating to an appeal court', example: 'Appellate court.' }
+                ]
+            },
+            {
+                words: ['stationary', 'stationery'],
+                definitions: [
+                    { word: 'stationary', def: 'Not moving; fixed in place', example: 'A stationary bike.' },
+                    { word: 'stationery', def: 'Writing materials and supplies', example: 'Office stationery.' }
+                ]
+            },
+            {
+                words: ['compliment', 'complement'],
+                definitions: [
+                    { word: 'compliment', def: 'Expression of praise', example: 'Thank you for the compliment!' },
+                    { word: 'complement', def: 'Something that completes', example: 'Wine complements the meal.' }
+                ]
+            },
+            {
+                words: ['principle', 'principal'],
+                definitions: [
+                    { word: 'principle', def: 'Fundamental rule or belief', example: 'Stick to your principles.' },
+                    { word: 'principal', def: 'Main; headmaster; amount of money', example: 'The principal of the school.' }
+                ]
+            },
+            {
+                words: ['break', 'brake'],
+                definitions: [
+                    { word: 'break', def: 'To shatter or fracture', example: 'Don\'t break the glass.' },
+                    { word: 'brake', def: 'Device to stop something', example: 'Car brake.' }
+                ]
+            },
+            {
+                words: ['piece', 'peace'],
+                definitions: [
+                    { word: 'piece', def: 'Part or portion of something', example: 'A piece of cake.' },
+                    { word: 'peace', def: 'Absence of conflict', example: 'World peace.' }
+                ]
+            },
+            {
+                words: ['whole', 'hole'],
+                definitions: [
+                    { word: 'whole', def: 'Complete; entire', example: 'The whole pizza.' },
+                    { word: 'hole', def: 'Opening or cavity', example: 'Hole in the ground.' }
+                ]
+            },
+            {
+                words: ['bare', 'bear'],
+                definitions: [
+                    { word: 'bare', def: 'Not covered; nude', example: 'Bare feet.' },
+                    { word: 'bear', def: 'Large animal; to carry or endure', example: 'I can\'t bear this pain.' }
+                ]
+            },
+            {
+                words: ['canon', 'cannon'],
+                definitions: [
+                    { word: 'canon', def: 'Accepted principles or standards', example: 'The literary canon.' },
+                    { word: 'cannon', def: 'Large gun', example: 'Ship\'s cannon.' }
+                ]
+            },
+            {
+                words: ['incite', 'insight'],
+                definitions: [
+                    { word: 'incite', def: 'To urge or stir up', example: 'Incite a riot.' },
+                    { word: 'insight', def: 'Deep understanding', example: 'That gave me insight.' }
+                ]
+            },
+            {
+                words: ['peak', 'peek', 'pique'],
+                definitions: [
+                    { word: 'peak', def: 'Highest point; mountain top', example: 'Mountain peak.' },
+                    { word: 'peek', def: 'To look quickly', example: 'Take a peek.' },
+                    { word: 'pique', def: 'To arouse interest; a fit of irritation', example: 'Pique your interest.' }
+                ]
+            },
+            {
+                words: ['role', 'roll'],
+                definitions: [
+                    { word: 'role', def: 'Part in a play or position', example: 'Lead role.' },
+                    { word: 'roll', def: 'To move by turning; a type of bread', example: 'Roll the ball.' }
+                ]
+            },
+            {
+                words: ['soul', 'sole'],
+                definitions: [
+                    { word: 'soul', def: 'Spirit; emotional nature', example: 'Soul music.' },
+                    { word: 'sole', def: 'Only; bottom of foot or shoe; a type of fish', example: 'Sole survivor.' }
+                ]
+            },
+            {
+                words: ['where', 'wear'],
+                definitions: [
+                    { word: 'where', def: 'At what place', example: 'Where are you going?' },
+                    { word: 'wear', def: 'To have on one\'s body; to erode', example: 'Wear a coat.' }
+                ]
+            },
+            {
+                words: ['aloud', 'allowed'],
+                definitions: [
+                    { word: 'aloud', def: 'Said out loud; audibly', example: 'Read aloud.' },
+                    { word: 'allowed', def: 'Permitted', example: 'Not allowed here.' }
+                ]
+            },
+            {
+                words: ['I', 'eye', 'aye'],
+                definitions: [
+                    { word: 'I', def: 'First-person pronoun', example: 'I am here.' },
+                    { word: 'eye', def: 'Organ of sight', example: 'Blue eyes.' },
+                    { word: 'aye', def: 'Yes; affirmative vote', example: 'Aye, aye, captain!' }
+                ]
+            },
+            {
+                words: ['hour', 'our'],
+                definitions: [
+                    { word: 'hour', def: 'Unit of time (60 minutes)', example: 'One hour.' },
+                    { word: 'our', def: 'Possessive form of we', example: 'Our house.' }
+                ]
+            },
+            {
+                words: ['plain', 'plane'],
+                definitions: [
+                    { word: 'plain', def: 'Simple; undecorated; flat area', example: 'Plain clothing.' },
+                    { word: 'plane', def: 'Aircraft; flat surface; to smooth', example: 'Airplane.' }
+                ]
+            },
+            {
+                words: ['right', 'write'],
+                definitions: [
+                    { word: 'right', def: 'Correct; direction opposite of left', example: 'That\'s right.' },
+                    { word: 'write', def: 'To mark with letters or words', example: 'Write a letter.' }
+                ]
+            },
+            {
+                words: ['so', 'sew'],
+                definitions: [
+                    { word: 'so', def: 'To such a degree; therefore', example: 'So happy.' },
+                    { word: 'sew', def: 'To stitch with needle and thread', example: 'Sew a button.' }
+                ]
+            },
+            {
+                words: ['sale', 'sail', 'sell', 'cell'],
+                definitions: [
+                    { word: 'sale', def: 'Event where items are sold at reduced price', example: 'Garage sale.' },
+                    { word: 'sail', def: 'Fabric to catch wind; to travel by boat', example: 'Sail the sea.' },
+                    { word: 'sell', def: 'To exchange for money', example: 'Sell your car.' },
+                    { word: 'cell', def: 'Small room; smallest unit of life', example: 'Prison cell.' }
+                ]
+            },
+            {
+                words: ['suite', 'sweet'],
+                definitions: [
+                    { word: 'suite', def: 'Set of rooms; musical composition', example: 'Hotel suite.' },
+                    { word: 'sweet', def: 'Sugary; pleasant', example: 'Sweet candy.' }
+                ]
+            },
+            {
+                words: ['vein', 'vane'],
+                definitions: [
+                    { word: 'vein', def: 'Blood vessel; streak in mineral', example: 'Veins carry blood.' },
+                    { word: 'vane', def: 'Weather vane; blade', example: 'Weather vane.' }
+                ]
+            },
+            {
+                words: ['wait', 'weight'],
+                definitions: [
+                    { word: 'wait', def: 'To pause or stay in expectation', example: 'Wait for me.' },
+                    { word: 'weight', def: 'How heavy something is', example: 'Body weight.' }
+                ]
+            },
+            {
+                words: ['ought', 'aught'],
+                definitions: [
+                    { word: 'ought', def: 'Should; moral obligation', example: 'You ought to know.' },
+                    { word: 'aught', def: 'Anything; zero', example: 'Aught to nothing.' }
+                ]
+            },
+            {
+                words: ['all ready', 'already'],
+                definitions: [
+                    { word: 'all ready', def: 'Completely prepared', example: 'Are you all ready to go?' },
+                    { word: 'already', def: 'Before now; by this time', example: 'I\'ve already eaten.' }
+                ]
+            },
+            {
+                words: ['elicit', 'illicit'],
+                definitions: [
+                    { word: 'elicit', def: 'To draw out; evoke', example: 'Elicit a response.' },
+                    { word: 'illicit', def: 'Forbidden or illegal', example: 'Illicit activity.' }
+                ]
+            },
+            {
+                words: ['imminent', 'eminent', 'immanent'],
+                definitions: [
+                    { word: 'imminent', def: 'About to happen; impending', example: 'Danger is imminent.' },
+                    { word: 'eminent', def: 'Renowned; distinguished', example: 'Eminent scientist.' },
+                    { word: 'immanent', def: 'Inherent; existing within', example: 'Justice immanent in nature.' }
+                ]
+            },
+            {
+                words: ['precede', 'proceed'],
+                definitions: [
+                    { word: 'precede', def: 'To come before', example: 'Precede the event.' },
+                    { word: 'proceed', def: 'To continue; move forward', example: 'Please proceed.' }
+                ]
+            },
+            {
+                words: ['wreak', 'reek'],
+                definitions: [
+                    { word: 'wreak', def: 'To cause damage or destruction', example: 'Wreak havoc.' },
+                    { word: 'reek', def: 'To smell bad; unpleasant odor', example: 'Reek of smoke.' }
+                ]
+            }
+        ];
+
+        const idiomsData = [
+            {
+                words: ['with bated breath', 'not baited'],
+                definitions: [
+                    { word: 'with bated breath', def: 'Eagerly or anxiously', example: 'Waiting with bated breath for the results.' },
+                    { word: 'baited (incorrect)', def: 'Common mistake - bated means reduced or restrained', example: 'Do not say "baited breath".' }
+                ]
+            },
+            {
+                words: ['to pore over', 'not pour'],
+                definitions: [
+                    { word: 'to pore over', def: 'To examine carefully and intently', example: 'Pore over the documents.' },
+                    { word: 'pour (incorrect)', def: 'Pour means to flow or serve liquid', example: 'Do not say "pour over".' }
+                ]
+            },
+            {
+                words: ['a trouper', 'not trooper'],
+                definitions: [
+                    { word: 'a trouper', def: 'A reliable, uncomplaining person', example: 'She\'s a real trouper through all difficulties.' },
+                    { word: 'trooper (incorrect)', def: 'A soldier or law enforcement officer', example: 'Do not confuse with state trooper.' }
+                ]
+            },
+            {
+                words: ['to rack one\'s brain', 'not wrack'],
+                definitions: [
+                    { word: 'to rack one\'s brain', def: 'To think very hard', example: 'Rack your brain to remember the answer.' },
+                    { word: 'wrack (incorrect)', def: 'Wrack means to damage or destroy', example: 'Do not say "wrack your brain".' }
+                ]
+            },
+            {
+                words: ['one and the same', 'not in'],
+                definitions: [
+                    { word: 'one and the same', def: 'The same thing; identical', example: 'These two words are one and the same.' },
+                    { word: 'in (incorrect)', def: 'Do not use "in" instead of "and"', example: 'Avoid saying "one in the same".' }
+                ]
+            },
+            {
+                words: ['leeway'],
+                definitions: [
+                    { word: 'leeway', def: 'Allowable margin of variation or freedom', example: 'We have some leeway in the deadline.' }
+                ]
+            },
+            {
+                words: ['to home in', 'not hone'],
+                definitions: [
+                    { word: 'to home in', def: 'To find and move directly toward something', example: 'Home in on the target.' },
+                    { word: 'hone (incorrect)', def: 'Hone means to sharpen a skill', example: 'Do not say "hone in" - use "home in".' }
+                ]
+            },
+            {
+                words: ['to palm off', 'not pawn'],
+                definitions: [
+                    { word: 'to palm off', def: 'To dispose of by trickery or deception', example: 'Palm off fake goods on unsuspecting buyers.' },
+                    { word: 'pawn (incorrect)', def: 'Pawn means to pledge something as security', example: 'Do not say "pawn off".' }
+                ]
+            },
+            {
+                words: ['sleight of hand', 'not slight'],
+                definitions: [
+                    { word: 'sleight of hand', def: 'Adroitness in deception or magic tricks', example: 'The magician used sleight of hand.' },
+                    { word: 'slight (incorrect)', def: 'Slight means small or to disrespect', example: 'Do not confuse with "slight of hand".' }
+                ]
+            },
+            {
+                words: ['different tack', 'not track'],
+                definitions: [
+                    { word: 'different tack', def: 'To change direction or approach; zigzag', example: 'Try a different tack in your argument.' },
+                    { word: 'track (incorrect)', def: 'Track means a path or to follow', example: 'Do not say "different track".' }
+                ]
+            },
+            {
+                words: ['whet your appetite', 'not wet'],
+                definitions: [
+                    { word: 'whet your appetite', def: 'To sharpen or stimulate interest or hunger', example: 'That preview will whet your appetite.' },
+                    { word: 'wet (incorrect)', def: 'Wet means covered with water', example: 'Do not say "wet your appetite".' }
+                ]
+            },
+            {
+                words: ['toe the line', 'not tow'],
+                definitions: [
+                    { word: 'toe the line', def: 'To conform to a rule or standard', example: 'Employees must toe the line.' },
+                    { word: 'tow (incorrect)', def: 'Tow means to pull or drag', example: 'Do not say "tow the line".' }
+                ]
+            },
+            {
+                words: ['just deserts', 'not desserts'],
+                definitions: [
+                    { word: 'just deserts', def: 'Deserved reward or punishment', example: 'He got his just deserts.' },
+                    { word: 'desserts (incorrect)', def: 'Desserts are sweet foods eaten after meals', example: 'Do not confuse with "desserts".' }
+                ]
+            },
+            {
+                words: ['lo and behold'],
+                definitions: [
+                    { word: 'lo and behold', def: 'An interjection expressing wonder and surprise', example: 'Lo and behold, the package arrived!' }
+                ]
+            },
+            {
+                words: ['a moot point', 'not mute'],
+                definitions: [
+                    { word: 'a moot point', def: 'Open to debate; irrelevant or debatable', example: 'Whether to use tabs or spaces is a moot point.' },
+                    { word: 'mute (incorrect)', def: 'Mute means unable to speak', example: 'Do not confuse with "a mute point".' }
+                ]
+            },
+            {
+                words: ['case in point'],
+                definitions: [
+                    { word: 'case in point', def: 'A relevant or illustrative example', example: 'Last year\'s failure is a case in point.' }
+                ]
+            },
+            {
+                words: ['to nip in the bud'],
+                definitions: [
+                    { word: 'to nip in the bud', def: 'To stop something immediately; prevent early', example: 'Nip the problem in the bud.' }
+                ]
+            },
+            {
+                words: ['another think coming', 'not thing'],
+                definitions: [
+                    { word: 'another think coming', def: 'You need to reconsider; think again', example: 'If you think you\'ll win, you have another think coming.' },
+                    { word: 'thing (incorrect)', def: 'Some argue this is acceptable modern usage', example: 'Traditionally, use "think" not "thing".' }
+                ]
+            },
+            {
+                words: ['at someone\'s beck and call'],
+                definitions: [
+                    { word: 'at someone\'s beck and call', def: 'Always ready to do what someone asks', example: 'The servant was at the master\'s beck and call.' }
+                ]
+            },
+            {
+                words: ['to rein in', 'not rain'],
+                definitions: [
+                    { word: 'to rein in', def: 'To limit, control, or stop something', example: 'The CEO had to rein in spending.' },
+                    { word: 'rain (incorrect)', def: 'Rain is precipitation from clouds', example: 'Do not say "rain in" spending.' }
+                ]
+            },
+            {
+                words: ['to champ at the bit'],
+                definitions: [
+                    { word: 'to champ at the bit', def: 'Waiting impatiently; eager to act', example: 'The team was champing at the bit to start.' }
+                ]
+            },
+            {
+                words: ['chest of drawers'],
+                definitions: [
+                    { word: 'chest of drawers', def: 'Furniture for storing and holding clothes', example: 'Put your clothes in the chest of drawers.' }
+                ]
+            },
+            {
+                words: ['at my wits\' end'],
+                definitions: [
+                    { word: 'at my wits\' end', def: 'At a loss for a means of solving a problem; confused', example: 'I\'m at my wits\' end trying to fix this.' }
+                ]
+            },
+            {
+                words: ['scot-free'],
+                definitions: [
+                    { word: 'scot-free', def: 'Completely free from obligation, harm, or penalty', example: 'The criminal got away scot-free.' }
+                ]
+            },
+            {
+                words: ['on tenterhooks'],
+                definitions: [
+                    { word: 'on tenterhooks', def: 'In a state of uneasiness, strain, or suspense', example: 'We\'ve been on tenterhooks waiting for news.' }
+                ]
+            }
+        ];
+
+        const trickyWordsData = [
+            {
+                words: ['et al.'],
+                definitions: [
+                    { word: 'et al.', def: 'Latin abbreviation meaning "and others"; has a period after "al" and is surrounded by commas', example: 'Jones, et al., plaintiffs in the case.' }
+                ]
+            },
+            {
+                words: ['subpoena', 'subpoenaed'],
+                definitions: [
+                    { word: 'subpoena', def: 'A legal document requiring someone to appear in court', example: 'She received a subpoena.' },
+                    { word: 'subpoenaed', def: 'Past tense of subpoena', example: 'He was subpoenaed to testify.' }
+                ]
+            },
+            {
+                words: ['courtroom', 'not court room'],
+                definitions: [
+                    { word: 'courtroom', def: 'The room where legal proceedings take place; written as one word', example: 'The courtroom was full.' },
+                    { word: 'court room (incorrect)', def: 'Should not be written as two words', example: 'Use "courtroom" not "court room".' }
+                ]
+            },
+            {
+                words: ['effed up'],
+                definitions: [
+                    { word: 'effed up', def: 'Messed up; made a mistake (from Merriam Webster dictionary)', example: 'He really effed up that presentation.' }
+                ]
+            },
+            {
+                words: ['email', 'not E-mail or e-mail'],
+                definitions: [
+                    { word: 'email', def: 'Electronic mail; written as one word in lowercase or after a capital letter', example: 'Send me an email.' },
+                    { word: 'E-mail/e-mail (outdated)', def: 'Older hyphenated formats are no longer standard', example: 'Modern style is "email" not "e-mail".' }
+                ]
+            },
+            {
+                words: ['barbershop', 'not barber shop'],
+                definitions: [
+                    { word: 'barbershop', def: 'A shop where haircuts are given; written as one word', example: 'The barbershop is on Main Street.' },
+                    { word: 'barber shop (incorrect)', def: 'Should not be written as two words', example: 'Use "barbershop" not "barber shop".' }
+                ]
+            },
+            {
+                words: ['all right', 'not alright'],
+                definitions: [
+                    { word: 'all right', def: 'Satisfactory; okay; written as two words', example: 'Is everything all right?' },
+                    { word: 'alright (informal)', def: 'Nonstandard single-word form; acceptable in informal writing', example: '"Alright" is used informally but "all right" is standard.' }
+                ]
+            },
+            {
+                words: ['okay', 'not OK'],
+                definitions: [
+                    { word: 'okay', def: 'Acceptable; all right; spelled out rather than abbreviated', example: 'Is that okay with you?' },
+                    { word: 'OK (abbreviation)', def: 'Abbreviated form; less formal than "okay"', example: 'Both "OK" and "okay" are acceptable.' }
+                ]
+            },
+            {
+                words: ['centerline', 'not center line'],
+                definitions: [
+                    { word: 'centerline', def: 'A line running through the middle; written as one word', example: 'Stay on the centerline of the road.' },
+                    { word: 'center line (incorrect)', def: 'Should not be written as two words', example: 'Use "centerline" not "center line".' }
+                ]
+            },
+            {
+                words: ['dot-com bubble', 'dot-com boom'],
+                definitions: [
+                    { word: 'dot-com bubble', def: 'The period of excessive speculation in internet companies; hyphenated', example: 'The dot-com bubble burst in 2000.' },
+                    { word: 'dot-com boom', def: 'Period of rapid internet company growth', example: 'The dot-com boom created many millionaires.' }
+                ]
+            },
+            {
+                words: ['hashtag'],
+                definitions: [
+                    { word: 'hashtag', def: 'A word or phrase preceded by # used in social media; typed as #word', example: 'Use #successful to tag successful posts.' }
+                ]
+            },
+            {
+                words: ['X-ray', 'not x-ray'],
+                definitions: [
+                    { word: 'X-ray', def: 'Electromagnetic radiation for medical imaging; capitalized X and hyphenated', example: 'The doctor ordered an X-ray.' },
+                    { word: 'x-ray (incorrect)', def: 'Should have capital X', example: 'Standard is "X-ray" not "x-ray".' }
+                ]
+            },
+            {
+                words: ['severally'],
+                definitions: [
+                    { word: 'severally', def: 'Legal term meaning individually; used in "jointly and severally"', example: 'The defendants are jointly and severally liable.' }
+                ]
+            },
+            {
+                words: ['affect', 'effect'],
+                definitions: [
+                    { word: 'affect (verb)', def: 'To influence or change; usually used as a verb', example: 'Will that rule affect someone\'s ability?' },
+                    { word: 'effect (noun)', def: 'Result or consequence; usually used as a noun', example: 'What effect will that rule have?' },
+                    { word: 'effect (verb)', def: 'To bring about or cause; exception to noun usage', example: 'How can you effect change?' },
+                    { word: 'affect (noun)', def: 'Emotion or feeling; exception to verb usage (psychology term)', example: 'His affect was sullen.' },
+                    { word: 'side effects', def: 'Secondary consequences; always a noun', example: 'What are the side effects of smoking?' }
+                ]
+            },
+            {
+                words: ['acknowledgment', 'not acknowledgement'],
+                definitions: [
+                    { word: 'acknowledgment', def: 'The act of admitting or recognizing; American spelling without the "e"', example: 'Her acknowledgment of the mistake was appreciated.' },
+                    { word: 'acknowledgement (British)', def: 'British spelling with the "e"; less common in American English', example: 'Both forms exist but "acknowledgment" is standard in US.' }
+                ]
+            },
+            {
+                words: ['judgment', 'not judgement'],
+                definitions: [
+                    { word: 'judgment', def: 'A formal decision; American spelling without the "e"', example: 'The judgment was in favor of the plaintiff.' },
+                    { word: 'judgement (British)', def: 'British spelling with the "e"; less common in American English', example: 'Both forms exist but "judgment" is standard in US.' }
+                ]
+            },
+            {
+                words: ['counsel (plural)'],
+                definitions: [
+                    { word: 'counsel', def: 'The plural of counsel is also counsel, not counsels; means lawyers', example: 'All counsel are required to attend.' },
+                    { word: 'counsels (incorrect)', def: 'Should not be used as plural form', example: 'Do not say "multiple counsels appeared".' }
+                ]
+            },
+            {
+                words: ['cross-examination'],
+                definitions: [
+                    { word: 'cross-examination', def: 'Questioning of a witness by opposing attorney; hyphenated and lowercase in mid-sentence', example: 'The cross-examination was intense.' },
+                    { word: 'Cross-examination (capitalized)', def: 'Capitalized when starting a sentence or heading', example: 'Cross-examination is a key legal procedure.' }
+                ]
+            },
+            {
+                words: ['councilmember', 'not council member'],
+                definitions: [
+                    { word: 'councilmember', def: 'A member of a council; written as one word', example: 'The councilmember voted to approve the measure.' },
+                    { word: 'council member (older)', def: 'Two-word form is less common now', example: 'Modern usage is "councilmember".' }
+                ]
+            },
+            {
+                words: ['jointly and severally'],
+                definitions: [
+                    { word: 'jointly and severally', def: 'Legal term meaning parties are both collectively and individually liable', example: 'The defendants are jointly and severally liable for damages.' }
+                ]
+            },
+            {
+                words: ['to nix'],
+                definitions: [
+                    { word: 'to nix', def: 'To get rid of; cancel or reject', example: 'The manager decided to nix the project.' }
+                ]
+            },
+            {
+                words: ['to 86'],
+                definitions: [
+                    { word: 'to 86', def: 'Restaurant slang meaning to discontinue or get rid of something; from menu ordering', example: 'We\'re 86ing the soup for today.' }
+                ]
+            },
+            {
+                words: ['bamboozled'],
+                definitions: [
+                    { word: 'bamboozled', def: 'Tricked or confused; deceived', example: 'I was completely bamboozled by the scam.' }
+                ]
+            },
+            {
+                words: ['discombobulated'],
+                definitions: [
+                    { word: 'discombobulated', def: 'Confused or bewildered; flustered', example: 'He seemed discombobulated after the accident.' }
+                ]
+            },
+            {
+                words: ['lollygag'],
+                definitions: [
+                    { word: 'lollygag', def: 'To spend time idly; dawdle or loaf around', example: 'Stop lollygagging and get to work!' }
+                ]
+            },
+            {
+                words: ['kerfuffle'],
+                definitions: [
+                    { word: 'kerfuffle', def: 'A fuss or commotion; a state of disorder or confusion', example: 'There was quite a kerfuffle over the seating arrangements.' }
+                ]
+            },
+            {
+                words: ['nincompoop'],
+                definitions: [
+                    { word: 'nincompoop', def: 'A foolish or stupid person; a simpleton', example: 'Don\'t be such a nincompoop!' }
+                ]
+            },
+            {
+                words: ['malarkey'],
+                definitions: [
+                    { word: 'malarkey', def: 'Nonsense; misleading or exaggerated talk', example: 'That\'s complete malarkey!' }
+                ]
+            },
+            {
+                words: ['brouhaha'],
+                definitions: [
+                    { word: 'brouhaha', def: 'A noisy and overexcited reaction; a heated dispute or disturbance', example: 'There was a brouhaha over the new policy.' }
+                ]
+            },
+            {
+                words: ['skedaddle'],
+                definitions: [
+                    { word: 'skedaddle', def: 'To leave hastily; run away', example: 'The kids skedaddled when they saw the police car.' }
+                ]
+            },
+            {
+                words: ['doohickey'],
+                definitions: [
+                    { word: 'doohickey', def: 'A gadget or device whose name is forgotten or unknown', example: 'Pass me that doohickey on the shelf.' }
+                ]
+            },
+            {
+                words: ['persnickety'],
+                definitions: [
+                    { word: 'persnickety', def: 'Fussy about details; hard to please; meticulous', example: 'He\'s very persnickety about his coffee.' }
+                ]
+            },
+            {
+                words: ['whatnot'],
+                definitions: [
+                    { word: 'whatnot', def: 'Various miscellaneous items; things and such', example: 'The shelves were full of books, vases, and whatnot.' }
+                ]
+            },
+            {
+                words: ['gobsmacked'],
+                definitions: [
+                    { word: 'gobsmacked', def: 'Shocked or surprised; astonished (British slang)', example: 'I was absolutely gobsmacked by the news.' }
+                ]
+            },
+            {
+                words: ['thingamajig'],
+                definitions: [
+                    { word: 'thingamajig', def: 'A gadget or object whose name is forgotten or not known', example: 'Hand me that thingamajig over there.' }
+                ]
+            },
+            {
+                words: ['whatsit'],
+                definitions: [
+                    { word: 'whatsit', def: 'A person or thing whose name is not remembered; a thingamabob', example: 'What\'s the name of that whatsit?' }
+                ]
+            },
+            {
+                words: ['whatchamacallit'],
+                definitions: [
+                    { word: 'whatchamacallit', def: 'Something whose proper name is not remembered; a generic term for an object', example: 'I need to fix the whatchamacallit on the door.' }
+                ]
+            },
+            {
+                words: ['gobbledygook'],
+                definitions: [
+                    { word: 'gobbledygook', def: 'Language that is meaningless or made unintelligible by excessive use of technical terms', example: 'The contract was full of legal gobbledygook.' }
+                ]
+            },
+            {
+                words: ['codswallop'],
+                definitions: [
+                    { word: 'codswallop', def: 'Nonsense; rubbish (British slang)', example: 'That\'s absolute codswallop!' }
+                ]
+            },
+            {
+                words: ['canoodle'],
+                definitions: [
+                    { word: 'canoodle', def: 'To cuddle or caress; to engage in fondling or petting', example: 'The couple sat in the corner canoodling.' }
+                ]
+            },
+            {
+                words: ['whippersnapper'],
+                definitions: [
+                    { word: 'whippersnapper', def: 'A young, inexperienced person considered to be presumptuous', example: 'That whippersnapper thinks he knows everything!' }
+                ]
+            },
+            {
+                words: ['flibbertigibbet'],
+                definitions: [
+                    { word: 'flibbertigibbet', def: 'A frivolous or excessively talkative person; a gossip', example: 'Stop being such a flibbertigibbet and listen!' }
+                ]
+            },
+            {
+                words: ['poppycock'],
+                definitions: [
+                    { word: 'poppycock', def: 'Nonsense; foolish talk or ideas', example: 'That\'s pure poppycock!' }
+                ]
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let quizAnswered = 0;
+        let currentFlashcardIndex = 0;
+        let isFlipped = false;
+        let flashcards = [];
+
+        function switchCategory(category) {
+            currentCategory = category;
+            if (category === 'homophones') {
+                currentData = homophonesData;
+            } else if (category === 'idioms') {
+                currentData = idiomsData;
+            } else if (category === 'tricky') {
+                currentData = trickyWordsData;
+            }
+            flashcards = [...currentData];
+            
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.mode-btn').forEach(b => {
+                if (b.textContent.includes('Reference')) b.click();
+            });
+        }
+
+        function switchMode(mode) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(mode).classList.add('active');
+            
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (mode === 'reference') {
+                loadReference();
+            } else if (mode === 'quiz') {
+                loadQuiz();
+            } else if (mode === 'flashcards') {
+                loadFlashcards();
+            }
+        }
+
+        function loadReference() {
+            const container = document.getElementById('wordsContainer');
+            container.innerHTML = '';
+            
+            currentData.forEach(group => {
+                const div = document.createElement('div');
+                div.className = 'word-pair';
+                
+                const title = document.createElement('h3');
+                title.textContent = group.words.join(' • ');
+                div.appendChild(title);
+                
+                const defsDiv = document.createElement('div');
+                defsDiv.className = 'word-definitions';
+                
+                group.definitions.forEach(def => {
+                    const defDiv = document.createElement('div');
+                    defDiv.className = 'definition';
+                    defDiv.innerHTML = `
+                        <strong>${def.word}</strong>
+                        <p>${def.def}</p>
+                        <div class="example">"${def.example}"</div>
+                    `;
+                    defsDiv.appendChild(defDiv);
+                });
+                
+                div.appendChild(defsDiv);
+                container.appendChild(div);
+            });
+        }
+
+        function filterWords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const container = document.getElementById('wordsContainer');
+            const pairs = container.querySelectorAll('.word-pair');
+            
+            let visibleCount = 0;
+            pairs.forEach(pair => {
+                const text = pair.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    pair.style.display = '';
+                    visibleCount++;
+                } else {
+                    pair.style.display = 'none';
+                }
+            });
+            
+            if (visibleCount === 0 && searchTerm !== '') {
+                container.innerHTML += '<div class="no-results">No words found matching your search.</div>';
+            }
+        }
+
+        function loadQuiz() {
+            startQuiz();
+        }
+
+        function startQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            quizAnswered = 0;
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            if (currentQuizIndex >= currentData.length) {
+                showQuizResults();
+                return;
+            }
+
+            const group = currentData[currentQuizIndex];
+            const correctWord = group.definitions[Math.floor(Math.random() * group.definitions.length)];
+            const allDefs = group.definitions.map(d => d.def);
+            
+            const shuffledOptions = allDefs.sort(() => Math.random() - 0.5);
+            
+            let html = `
+                <div class="quiz-question">
+                    <h3>What does "${correctWord.word}" mean?</h3>
+                    <div class="options">
+            `;
+            
+            shuffledOptions.forEach(option => {
+                html += `<div class="option" onclick="selectAnswer(this, '${correctWord.def}')">${option}</div>`;
+            });
+            
+            html += `
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            `;
+            
+            document.getElementById('quizContainer').innerHTML = html;
+        }
+
+        function selectAnswer(element, correct) {
+            if (element.classList.contains('disabled')) return;
+            
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.add('disabled'));
+            
+            const feedback = document.getElementById('feedback');
+            if (element.textContent === correct) {
+                element.classList.add('correct');
+                quizScore++;
+                feedback.classList.add('correct', 'show');
+                feedback.textContent = '✓ Correct!';
+            } else {
+                element.classList.add('incorrect');
+                feedback.classList.add('incorrect', 'show');
+                feedback.textContent = `✗ Incorrect. The correct answer is: ${correct}`;
+                
+                options.forEach(opt => {
+                    if (opt.textContent === correct) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+            
+            quizAnswered++;
+            updateQuizStats();
+            
+            setTimeout(() => {
+                currentQuizIndex++;
+                showQuizQuestion();
+            }, 2000);
+        }
+
+        function updateQuizStats() {
+            document.getElementById('quizScore').textContent = quizScore;
+            document.getElementById('quizTotal').textContent = quizAnswered;
+            const percentage = Math.round((quizScore / quizAnswered) * 100);
+            document.getElementById('quizPercentage').textContent = percentage + '%';
+            const progressPercent = (quizAnswered / currentData.length) * 100;
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+        }
+
+        function showQuizResults() {
+            const percentage = Math.round((quizScore / currentData.length) * 100);
+            let message = '';
+            
+            if (percentage === 100) {
+                message = 'Perfect score! You\'re a master of these words!';
+            } else if (percentage >= 80) {
+                message = 'Excellent! You\'re very proficient!';
+            } else if (percentage >= 60) {
+                message = 'Good job! Keep practicing!';
+            } else {
+                message = 'Keep studying! You\'ll improve!';
+            }
+            
+            document.getElementById('quizContainer').innerHTML = `
+                <div class="quiz-question" style="text-align: center;">
+                    <h3>Quiz Complete!</h3>
+                    <div class="score">Score: ${quizScore} / ${currentData.length} (${percentage}%)</div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function resetQuiz() {
+            startQuiz();
+        }
+
+        function loadFlashcards() {
+            currentFlashcardIndex = 0;
+            isFlipped = false;
+            showFlashcard();
+        }
+
+        function showFlashcard() {
+            if (currentFlashcardIndex >= flashcards.length) {
+                currentFlashcardIndex = 0;
+            }
+            
+            const group = flashcards[currentFlashcardIndex];
+            const card = document.getElementById('flashcard');
+            
+            isFlipped = false;
+            card.textContent = group.words.join(' • ');
+            card.style.transform = 'rotateY(0deg)';
+            
+            updateCardCounter();
+        }
+
+        function flipCard() {
+            const card = document.getElementById('flashcard');
+            const group = flashcards[currentFlashcardIndex];
+            
+            if (!isFlipped) {
+                let defs = group.definitions.map(d => `<strong>${d.word}:</strong> ${d.def}`).join('<br><br>');
+                card.innerHTML = defs;
+                isFlipped = true;
+            } else {
+                card.textContent = group.words.join(' • ');
+                isFlipped = false;
+            }
+        }
+
+        function nextCard() {
+            currentFlashcardIndex = (currentFlashcardIndex + 1) % flashcards.length;
+            showFlashcard();
+        }
+
+        function previousCard() {
+            currentFlashcardIndex = (currentFlashcardIndex - 1 + flashcards.length) % flashcards.length;
+            showFlashcard();
+        }
+
+        function shuffleFlashcards() {
+            for (let i = flashcards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+            }
+            showFlashcard();
+        }
+
+        function updateCardCounter() {
+            document.getElementById('cardCounter').textContent = (currentFlashcardIndex + 1) + ' / ' + flashcards.length;
+            const progressPercent = ((currentFlashcardIndex + 1) / flashcards.length) * 100;
+            document.getElementById('cardProgressFill').style.width = progressPercent + '%';
+        }
+
+        // Initialize
+        currentData = homophonesData;
+        flashcards = [...homophonesData];
+    </script>
+
+    <script>
+        // Register Service Worker for offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
