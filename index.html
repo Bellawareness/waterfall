@@ -489,6 +489,7 @@
                 <button class="category-btn active" onclick="switchCategory('homophones')">Homophones</button>
                 <button class="category-btn" onclick="switchCategory('idioms')">Idioms</button>
                 <button class="category-btn" onclick="switchCategory('tricky')">Tricky Words</button>
+                <button class="category-btn" onclick="switchCategory('medical')">Medical Terms</button>
             </div>
 
             <div class="mode-selector">
@@ -1439,6 +1440,141 @@
             }
         ];
 
+        const medicalTermsData = [
+            {
+                words: ['andro-'],
+                definitions: [
+                    { word: 'andro-', def: 'Male', example: 'Androgens, like testosterone, are hormones that regulate the development of male characteristics.' }
+                ]
+            },
+            {
+                words: ['angio-'],
+                definitions: [
+                    { word: 'angio-', def: 'Blood vessels', example: 'Angioplasty is a procedure that unblocks veins or arteries.' }
+                ]
+            },
+            {
+                words: ['carcino-'],
+                definitions: [
+                    { word: 'carcino-', def: 'Cancer', example: 'Carcinogens cause cancer. Carcinoma is a cancer tumor.' }
+                ]
+            },
+            {
+                words: ['cardio-'],
+                definitions: [
+                    { word: 'cardio-', def: 'Heart', example: 'Cardiology is the study of the heart.' }
+                ]
+            },
+            {
+                words: ['cephal-'],
+                definitions: [
+                    { word: 'cephal-', def: 'Head', example: 'Cephalic means relating to the head. Microcephalic means small head.' }
+                ]
+            },
+            {
+                words: ['cerebro-'],
+                definitions: [
+                    { word: 'cerebro-', def: 'Brain', example: 'Cerebrum is the largest part of your brain. Cerebral palsy affects movement and posture.' }
+                ]
+            },
+            {
+                words: ['chole-'],
+                definitions: [
+                    { word: 'chole-', def: 'Bile, fat', example: 'Cholesterol is a waxy, fat-like substance essential in the body.' }
+                ]
+            },
+            {
+                words: ['-coccus, -cocci'],
+                definitions: [
+                    { word: '-coccus/-cocci', def: 'Seed, seeds', example: 'Streptococcus is a gram-positive bacteria that causes strep throat.' }
+                ]
+            },
+            {
+                words: ['cuta-'],
+                definitions: [
+                    { word: 'cuta-', def: 'Skin', example: 'Cutaneous means on the skin. Subcutaneous fat is fat below your skin.' }
+                ]
+            },
+            {
+                words: ['derma-'],
+                definitions: [
+                    { word: 'derma-', def: 'Skin', example: 'A dermatologist is a doctor who specializes in skin. Dermatitis is inflammation of the skin.' }
+                ]
+            },
+            {
+                words: ['dys-'],
+                definitions: [
+                    { word: 'dys-', def: 'Bad, difficult', example: 'Dyspepsia is indigestion. Dyspnea is difficulty breathing.' }
+                ]
+            },
+            {
+                words: ['-ecto'],
+                definitions: [
+                    { word: '-ecto', def: 'Outer, outside', example: 'An ectopic pregnancy is when the fertilized egg implants outside the uterus.' }
+                ]
+            },
+            {
+                words: ['encephalo-'],
+                definitions: [
+                    { word: 'encephalo-', def: 'Brain', example: 'Encephalitis is inflammation of the brain. Encephalogram is an image of the brain.' }
+                ]
+            },
+            {
+                words: ['endo-'],
+                definitions: [
+                    { word: 'endo-', def: 'From within, inside', example: 'Endogenous means coming from within the body. Endorphins are hormones made within the body.' }
+                ]
+            },
+            {
+                words: ['epi-'],
+                definitions: [
+                    { word: 'epi-', def: 'On, above, upon', example: 'Epidermis is the top layer of skin. Epiglottis prevents food from going into the lungs.' }
+                ]
+            },
+            {
+                words: ['erythro-'],
+                definitions: [
+                    { word: 'erythro-', def: 'Red', example: 'Erythrocytes are red blood cells.' }
+                ]
+            },
+            {
+                words: ['estro-'],
+                definitions: [
+                    { word: 'estro-', def: 'Female', example: 'Estrogen is a hormone important to the female reproductive system.' }
+                ]
+            },
+            {
+                words: ['exo-'],
+                definitions: [
+                    { word: 'exo-', def: 'Outside, external', example: 'Exogenous means coming from outside the body. Exoskeleton is an exterior skeletal system.' }
+                ]
+            },
+            {
+                words: ['gastro-'],
+                definitions: [
+                    { word: 'gastro-', def: 'Stomach', example: 'Gastritis means inflammation in the stomach. Gastroenterology is the study of the digestive system.' }
+                ]
+            },
+            {
+                words: ['gyne-'],
+                definitions: [
+                    { word: 'gyne-', def: 'Female, woman', example: 'Gynecology is the study of women\'s reproductive health.' }
+                ]
+            },
+            {
+                words: ['hema-, hemo-'],
+                definitions: [
+                    { word: 'hema-/hemo-', def: 'Blood', example: 'Hematology is the study of blood. Hemophilia is a bleeding disorder that prevents blood from clotting.' }
+                ]
+            },
+            {
+                words: ['hydro-'],
+                definitions: [
+                    { word: 'hydro-', def: 'Water', example: 'Hydrogen is a water-generating element (H2O). Hydrocephalic means water in the head.' }
+                ]
+            }
+        ];
+
         let currentQuizIndex = 0;
         let quizScore = 0;
         let quizAnswered = 0;
@@ -1454,6 +1590,8 @@
                 currentData = idiomsData;
             } else if (category === 'tricky') {
                 currentData = trickyWordsData;
+            } else if (category === 'medical') {
+                currentData = medicalTermsData;
             }
             flashcards = [...currentData];
             
